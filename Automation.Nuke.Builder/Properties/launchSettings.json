@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Automation.Nuke.Builder": {
+      "commandName": "Project",
+      "commandLineArgs": "setup"
+    }
+  }
+}
