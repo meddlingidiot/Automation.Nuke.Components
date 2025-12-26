@@ -10,8 +10,8 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 namespace Automation.Nuke.Components.Components;
 
-public interface IPackage : INukeBuild, IVelopack, IHasSolution, IHasConfiguration, 
-    IHasGitVersion, IHasArtifacts, IHasAzureDevOpsFeeds, IDoTag
+public interface IPackage : INukeBuild, IVelopack, IHasSolution, IHasConfiguration,
+    IHasGitVersion, IHasArtifacts, IHasGitHubPackages, IDoTag
 {
     Target Package => t => t
         .DependsOn<ITest>(x => x.Test)
@@ -33,28 +33,26 @@ public interface IPackage : INukeBuild, IVelopack, IHasSolution, IHasConfigurati
         .DependsOn(Package)
         .When(IsServerBuild || ForceTagRelease, _ => _
             .Triggers<ITagRelease>(x => x.TagRelease))
-        .Description("Deploy NuGet packages")
+        .Description("Deploy NuGet packages to GitHub Packages")
         .Executes(() =>
         {
-            Serilog.Log.Information("Deploying NuGet packages...");
+            Serilog.Log.Information("Deploying NuGet packages to GitHub Packages...");
 
             var currentBranch = GitTasks.GitCurrentBranch();
-            var isMainBranch = currentBranch.Equals("main", StringComparison.OrdinalIgnoreCase);            
-            
-            var feedId = isMainBranch ? ProductionFeedId : PrereleaseFeedId;
+            var isMainBranch = currentBranch.Equals("main", StringComparison.OrdinalIgnoreCase);
             var feedName = isMainBranch ? "Production" : "Prerelease";
-        
+
             var packages = ArtifactsDirectoryParam.GlobFiles("**/*.nupkg");
-        
+
             foreach (var package in packages)
             {
-                Serilog.Log.Information("Pushing {Package} to {Feed} feed", package.Name, feedName);
+                Serilog.Log.Information("Pushing {Package} to GitHub Packages ({Feed})", package.Name, feedName);
                 DotNetTasks.DotNetNuGetPush(s => s
                     .SetTargetPath(package)
-                    .SetSource($"https://pkgs.dev.azure.com/AFTR/_packaging/{feedId}/nuget/v3/index.json")
-                    .SetApiKey("az") // "az" is the convention for Azure DevOps
+                    .SetSource($"https://nuget.pkg.github.com/{GitHubOwner}/index.json")
+                    .SetApiKey(GitHubToken)
                     .SetSkipDuplicate(true));
-            }            
+            }
         });
 }
 
