@@ -143,6 +143,7 @@ jobs:
       - name: Publish Test Results
         uses: dorny/test-reporter@v1
         if: always()
+        continue-on-error: true
         with:
           name: 'Unit + Integration Tests'
           path: ${{ github.workspace }}/artifacts/test-results/**/*.trx
