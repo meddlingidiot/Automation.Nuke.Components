@@ -28,7 +28,7 @@ public class BuildFileGeneratorTests
         // Assert
         Assert.Contains("using Nuke.Common;", result);
         Assert.Contains("using Automation.Nuke.Components;", result);
-        Assert.Contains("public class Build : AzurePipelinesBuild, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets", result);
+        Assert.Contains("public class Build : GitHubActionsBuild, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets", result);
         Assert.Contains("public static int Main() => Execute<Build>(", result);
         Assert.Contains("x => ((ICompile)x).Compile);", result);
     }
@@ -347,7 +347,7 @@ public class BuildFileGeneratorTests
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
         // Assert
-        Assert.Contains("public class Build : AzurePipelinesBuild, ", result);
+        Assert.Contains("public class Build : GitHubActionsBuild, ", result);
         Assert.DoesNotContain("ICompile", result);
         Assert.DoesNotContain("ITest", result);
     }

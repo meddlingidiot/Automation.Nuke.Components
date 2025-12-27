@@ -29,7 +29,7 @@ public static class BuildFileGenerator
         // Build class declaration - use generic Build with interfaces from the selected DefaultBuild
         var interfaces = GetInterfacesForBuild(buildInfo.Name);
         var interfaceString = string.Join(", ", interfaces);
-        sb.AppendLine($"public class Build : AzurePipelinesBuild, {interfaceString}");
+        sb.AppendLine($"public class Build : GitHubActionsBuild, {interfaceString}");
         sb.AppendLine("{");
         sb.AppendLine();
 
