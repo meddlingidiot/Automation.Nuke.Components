@@ -30,4 +30,9 @@
     <EmbeddedResource Include="DefaultRootItems\**\*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Include DotnetToolSettings.xml in the package -->
+    <Content Include="DotnetToolSettings.xml" PackagePath="DotnetToolSettings.xml" />
+  </ItemGroup>
+
 </Project>
