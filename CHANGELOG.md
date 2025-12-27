@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - 1.0.46
 
+### 🐛 Bug Fixes
+
+- Fix `automation.nuke.builder` installation error by multi-targeting to .NET 8.0, 9.0, and 10.0, ensuring `DotnetToolSettings.xml` is available for all compatible SDKs.
+- Multi-target `Automation.Nuke.Components` to .NET 8.0, 9.0, and 10.0 for broader project compatibility.
+
 ### 📝 Other Changes
 
 - Remove redundant `new` modifier from `Main` method in `BuildFileGenerator` class. ([2d4c37c](../../commit/2d4c37c))
