@@ -14,7 +14,6 @@ public interface IHasVelopack: INukeBuild
     [Parameter] string AzureBlobAccount => TryGetValue(() => AzureBlobAccount) ?? 
                                            "meddlingidiotinstallers";
     
-    https://meddlingidiotinstallers.blob.core.windows.net/installers?sp=racwdl&st=2025-12-28T02:30:01Z&se=2029-12-31T10:45:01Z&spr=https&sv=2024-11-04&sr=c&sig=2RTMTJ8fLUFu80HoDRhzEmUargNMveQzK%2BX%2BcdjRF7A%3D
     [Parameter] string AzureBlobEndpoint => TryGetValue(() => AzureBlobEndpoint) ?? 
                                             "https://meddlingidiotinstallers.blob.core.windows.net";
     [Secret] string AzureBlobSasToken => TryGetValue(() => AzureBlobSasToken);
