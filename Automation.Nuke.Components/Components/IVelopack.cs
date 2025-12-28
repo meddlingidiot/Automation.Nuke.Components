@@ -62,6 +62,11 @@ public interface IVelopack : INukeBuild, IHasSolution, IHasConfiguration, IHasGi
                 vpkArgs += $" --timeout {AzureBlobTimeout}";
             }
 
+            // Ensure vpk is installed
+            Serilog.Log.Information("Installing/updating Velopack CLI...");
+            ProcessTasks.StartProcess("dotnet", "tool update -g vpk")
+                .AssertZeroExitCode();
+
             Serilog.Log.Information("Running: vpk {Args}", vpkArgs.Replace(AzureBlobSasTokenLocal, "***"));
 
             ProcessTasks.StartProcess("vpk", vpkArgs, workingDirectory: RootDirectory)
