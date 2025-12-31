@@ -21,4 +21,5 @@ public class Build : AzurePipelinesBuild, IShowVersion, IClean, ICompile, IResto
         x => ((IPackage)x).ReleasePackage);
 
     int IHasTests.MinCoverageThreshold => 35;
+    string IHasGitHubPackages.GitHubOwner => "meddlingidiot";
 }

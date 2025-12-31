@@ -312,10 +312,11 @@ public static class NuGetPackageInstaller
 
             foreach (var resourceName in resourceNames)
             {
-                // Extract filename from resource name
-                // Format: Automation.Nuke.Builder.DefaultRootItems.filename.ext
+                // Extract relative path from resource name
+                // Format: Automation.Nuke.Builder.DefaultRootItems.{path}.{filename}.ext
+                // We need to preserve directory structure (e.g., .github.workflows.build.yml)
                 var parts = resourceName.Split('.');
-                var fileNameParts = new List<string>();
+                var pathParts = new List<string>();
 
                 // Start from "DefaultRootItems" onwards
                 bool foundDefaultRootItems = false;
@@ -328,12 +329,45 @@ public static class NuGetPackageInstaller
                     }
                     if (foundDefaultRootItems)
                     {
-                        fileNameParts.Add(part);
+                        pathParts.Add(part);
                     }
                 }
 
-                var fileName = string.Join(".", fileNameParts);
-                var destFile = Path.Combine(workingDirectory, fileName);
+                // Reconstruct the relative path
+                // The last 2 parts are typically filename.extension (e.g., build.yml)
+                // Everything before that should be treated as directory path
+                var relativePath = string.Empty;
+                if (pathParts.Count >= 2)
+                {
+                    // Check if we have directory structure (more than 2 parts means directories exist)
+                    // E.g., [".github", "workflows", "build", "yml"] -> .github/workflows/build.yml
+                    var extension = pathParts[^1];
+                    var fileName = pathParts[^2];
+                    var directories = pathParts.Take(pathParts.Count - 2).ToList();
+
+                    if (directories.Count > 0)
+                    {
+                        relativePath = Path.Combine(Path.Combine(directories.ToArray()), $"{fileName}.{extension}");
+                    }
+                    else
+                    {
+                        relativePath = $"{fileName}.{extension}";
+                    }
+                }
+                else
+                {
+                    // Fallback to simple join
+                    relativePath = string.Join(".", pathParts);
+                }
+
+                var destFile = Path.Combine(workingDirectory, relativePath);
+                var destDirectory = Path.GetDirectoryName(destFile);
+
+                // Create directory if it doesn't exist
+                if (!string.IsNullOrEmpty(destDirectory) && !Directory.Exists(destDirectory))
+                {
+                    Directory.CreateDirectory(destDirectory);
+                }
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
@@ -349,7 +383,7 @@ public static class NuGetPackageInstaller
                     }
                 }
 
-                AnsiConsole.MarkupLine($"[green]Copied {fileName}[/]");
+                AnsiConsole.MarkupLine($"[green]Copied {relativePath}[/]");
             }
 
             AnsiConsole.MarkupLine("[green]All default root items copied successfully[/]");
