@@ -19,7 +19,7 @@ A library of modular, reusable Nuke build components that can be composed to cre
 - **Multi-targeting**: Supports .NET 8.0, 9.0, and 10.0
 
 ### Automation.Nuke.Builder
-A global .NET tool (`aftrnuke`) that provides an interactive setup experience for configuring Nuke builds across projects.
+A global .NET tool (`autonuke`) that provides an interactive setup experience for configuring Nuke builds across projects.
 
 **Key Features:**
 - **Interactive Setup**: Guided prompts using Spectre.Console
@@ -60,7 +60,7 @@ dotnet tool install --global --add-source ./bin/Debug Automation.Nuke.Builder
 Navigate to your project root and run:
 
 ```bash
-aftrnuke setup
+autonuke setup
 ```
 
 Follow the interactive prompts to:
@@ -325,7 +325,7 @@ public class Build : PackageBuild, IMyLint
 
 ## 📁 Generated Project Structure
 
-After running `aftrnuke setup`, your project will have:
+After running `autonuke setup`, your project will have:
 
 ```
 MyProject/
@@ -559,7 +559,7 @@ Contributions are welcome! This framework is designed to be extended.
 1. Create interface in `Automation.Nuke.Components/Components/`
 2. Add any required parameters in `Parameters/`
 3. Update relevant `DefaultBuilds/` templates
-4. Test with `aftrnuke setup`
+4. Test with `autonuke setup`
 5. Update documentation
 
 ### Adding a New Build Template

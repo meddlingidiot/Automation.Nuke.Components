@@ -11,7 +11,7 @@ nuget package, and all other dependencies like GitVersion to get setup.
 Plus I have some simple things like asking what the "goal" of this build
 is which should install one of the DefaultBuilds (CompileBuild, TestBuild,
 PackageBuild, etc). I think the goal is to make a global tool like nuke is
-to build automate the installation so you could do "aftrnuke : setup" and
+to build automate the installation so you could do "autonuke : setup" and
 it would prompt for which Default build would you like to use, It would
 dynamically load the builds based on which ones exist (code generation).
 Then it would generate the build script based on the selected Default build.

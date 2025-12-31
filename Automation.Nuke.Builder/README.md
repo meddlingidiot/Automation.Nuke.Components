@@ -45,7 +45,7 @@ dotnet tool install --global --add-source "./Automation.Nuke.Builder/nupkg" Auto
 Navigate to your project root directory and run:
 
 ```bash
-aftrnuke setup
+autonuke setup
 ```
 
 The tool will guide you through:
@@ -69,7 +69,7 @@ The tool will:
 
 ### Non-interactive (CI) usage
 
-You can re-run setup in CI or scripts to enforce conventions without prompts by answering with defaults when asked. For fully non-interactive flows, pre-create a `_build.csproj` that already references `Automation.Nuke.Components` and commit your chosen `Build.cs` so `aftrnuke setup` becomes a no-op.
+You can re-run setup in CI or scripts to enforce conventions without prompts by answering with defaults when asked. For fully non-interactive flows, pre-create a `_build.csproj` that already references `Automation.Nuke.Components` and commit your chosen `Build.cs` so `autonuke setup` becomes a no-op.
 
 ## Build Types
 
@@ -119,7 +119,7 @@ Complete pipeline with:
 
 ```bash
 cd MyProject
-aftrnuke setup
+autonuke setup
 
 # Follow the prompts:
 # - Select build type: TestBuild

@@ -39,7 +39,7 @@ public static class SetupCommand
     public static async Task<int> ExecuteAsync()
     {
         AnsiConsole.Write(
-            new FigletText("AFTR Nuke Setup")
+            new FigletText("MeddlingIdiot Nuke Setup")
                 .Color(Color.Blue));
 
         AnsiConsole.MarkupLine("[bold]Welcome to Automation Nuke Builder Setup![/]");

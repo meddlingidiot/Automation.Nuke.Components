@@ -9,7 +9,7 @@
     <!-- Global Tool Configuration -->
     <PackAsTool>true</PackAsTool>
     <IsPackable>true</IsPackable>
-    <ToolCommandName>aftrnuke</ToolCommandName>
+    <ToolCommandName>autonuke</ToolCommandName>
     <PackageId>Automation.Nuke.Builder</PackageId>
     <Authors>Luke Lanphear   </Authors>
     <Description>A global tool to simplify Nuke build setup across projects</Description>

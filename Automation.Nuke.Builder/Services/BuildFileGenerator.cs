@@ -50,6 +50,7 @@ public static class BuildFileGenerator
             }
         }
         sb.AppendLine();
+        sb.AppendLine("    string IHasGitHubPackages.GitHubOwner => \"meddlingidiot\";");
         
         // Generate property overrides
         if (buildInfo.RequiresVelopack && !string.IsNullOrEmpty(config.VelopackProjectName))
