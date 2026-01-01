@@ -14,12 +14,11 @@ using Automation.Nuke.Components.Parameters;
 ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
 ///   - Microsoft VSCode           https://nuke.build/vscode
 
-public class Build : GitHubActionsBuild, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets, IRunUnitTests, IRunIntegrationTests, IGenerateCoverageReport, ITest, IUpdateChangelog, IPackage, IVelopack, ITagRelease, IAnnounceRelease
+public class Build : GitHubActionsBuild, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets, IRunUnitTests, IRunIntegrationTests, IGenerateCoverageReport, ITest, IUpdateChangelog, IPackage, ITagRelease, IAnnounceRelease
 {
 
     public static int Main() => Execute<Build>(
-        x => ((IPackage)x).ReleasePackage,
-        y => ((IVelopack)y).ReleaseVelopack);
+        x => ((IPackage)x).ReleasePackage);
 
     string IHasGitHubPackages.GitHubOwner => "meddlingidiot";
     int IHasTests.MinCoverageThreshold => 35;
