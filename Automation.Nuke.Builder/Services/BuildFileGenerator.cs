@@ -91,28 +91,28 @@ public static class BuildFileGenerator
         {
             "CompileBuild" => new List<string>
             {
-                "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets"
+                "IHasGitHubPackages", "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets"
             },
             "TestBuild" => new List<string>
             {
-                "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets", "IRunUnitTests",
+                "IHasGitHubPackages", "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets", "IRunUnitTests",
                 "IRunIntegrationTests", "IGenerateCoverageReport", "ITest"
             },
             "PackageBuild" => new List<string>
             {
-                "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets",  "IRunUnitTests",
+                "IHasGitHubPackages", "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets",  "IRunUnitTests",
                 "IRunIntegrationTests", "IGenerateCoverageReport", "ITest",
                 "IUpdateChangelog", "IPackage", "ITagRelease", "IAnnounceRelease"
             },
             "VelopackBuild" => new List<string>
             {
-                "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets",  "IRunUnitTests",
+                "IHasGitHubPackages", "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets",  "IRunUnitTests",
                 "IRunIntegrationTests", "IGenerateCoverageReport", "ITest",
                 "IUpdateChangelog", "IVelopack", "ITagRelease", "IAnnounceRelease"
             },
             "PackageAndVelopackBuild" => new List<string>
             {
-                "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets", "IRunUnitTests",
+                "IHasGitHubPackages", "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets", "IRunUnitTests",
                 "IRunIntegrationTests", "IGenerateCoverageReport", "ITest", 
                 "IUpdateChangelog", "IPackage", "IVelopack", "ITagRelease", "IAnnounceRelease"
             },

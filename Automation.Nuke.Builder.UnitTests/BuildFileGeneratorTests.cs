@@ -28,7 +28,7 @@ public class BuildFileGeneratorTests
         // Assert
         Assert.Contains("using Nuke.Common;", result);
         Assert.Contains("using Automation.Nuke.Components;", result);
-        Assert.Contains("public class Build : GitHubActionsBuild, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets", result);
+        Assert.Contains("public class Build : GitHubActionsBuild, IHasGitHubPackages, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets", result);
         Assert.Contains("public static int Main() => Execute<Build>(", result);
         Assert.Contains("x => ((ICompile)x).Compile);", result);
     }

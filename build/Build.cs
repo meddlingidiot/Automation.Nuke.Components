@@ -6,7 +6,7 @@ using Automation.Nuke.Components.DefaultBuilds;
 using Automation.Nuke.Components.Parameters;
 
 /// <summary>
-/// Build configuration for PackageBuild
+/// Build configuration for PackageAndVelopackBuild
 /// </summary>
 /// Support plugins are available for:
 ///   - JetBrains ReSharper        https://nuke.build/resharper
@@ -14,12 +14,13 @@ using Automation.Nuke.Components.Parameters;
 ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
 ///   - Microsoft VSCode           https://nuke.build/vscode
 
-public class Build : AzurePipelinesBuild, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets, IRunUnitTests, IRunIntegrationTests, IGenerateCoverageReport, ITest, IUpdateChangelog, IPackage, ITagRelease, IAnnounceRelease
+public class Build : GitHubActionsBuild, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets, IRunUnitTests, IRunIntegrationTests, IGenerateCoverageReport, ITest, IUpdateChangelog, IPackage, IVelopack, ITagRelease, IAnnounceRelease
 {
 
     public static int Main() => Execute<Build>(
-        x => ((IPackage)x).ReleasePackage);
+        x => ((IPackage)x).ReleasePackage,
+        y => ((IVelopack)y).ReleaseVelopack);
 
-    int IHasTests.MinCoverageThreshold => 35;
     string IHasGitHubPackages.GitHubOwner => "meddlingidiot";
+    int IHasTests.MinCoverageThreshold => 35;
 }
