@@ -310,6 +310,13 @@ public static class NuGetPackageInstaller
                 return false;
             }
 
+            // Debug: Show all resource names
+            AnsiConsole.MarkupLine("[grey]Found resources:[/]");
+            foreach (var rn in resourceNames)
+            {
+                AnsiConsole.MarkupLine($"[grey]  - {rn.EscapeMarkup()}[/]");
+            }
+
             foreach (var resourceName in resourceNames)
             {
                 // Extract relative path from resource name
@@ -340,10 +347,26 @@ public static class NuGetPackageInstaller
                 if (pathParts.Count >= 2)
                 {
                     // Check if we have directory structure (more than 2 parts means directories exist)
-                    // E.g., [".github", "workflows", "build", "yml"] -> .github/workflows/build.yml
+                    // E.g., ["github", "workflows", "build", "yml"] -> .github/workflows/build.yml
+                    // Note: MSBuild may strip leading dots from embedded resource names
                     var extension = pathParts[^1];
                     var fileName = pathParts[^2];
                     var directories = pathParts.Take(pathParts.Count - 2).ToList();
+
+                    // Fix: Restore leading dot for hidden directories
+                    // MSBuild converts ".github" -> "github" or "_github" in resource names
+                    for (int i = 0; i < directories.Count; i++)
+                    {
+                        if (directories[i] == "github" || directories[i] == "_github")
+                        {
+                            directories[i] = ".github";
+                        }
+                        else if (directories[i].StartsWith("_"))
+                        {
+                            // Handle other hidden directories that start with underscore
+                            directories[i] = "." + directories[i].Substring(1);
+                        }
+                    }
 
                     if (directories.Count > 0)
                     {
