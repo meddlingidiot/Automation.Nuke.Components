@@ -26,8 +26,15 @@ public interface IVelopack : INukeBuild, IHasSolution, IHasConfiguration, IHasGi
                 return;
             }
 
+            if (string.IsNullOrEmpty(VelopackProjectName))
+            {
+                Serilog.Log.Warning("VelopackProjectName not provided, skipping building...");
+                Assert.False(true, "VelopackProjectName not provided");
+                return;
+            }
+
             var velopackProject = Solution.GetProject(VelopackProjectName);
-            if (string.IsNullOrEmpty(velopackProject?.Name) || string.IsNullOrEmpty(VelopackProjectName))
+            if (string.IsNullOrEmpty(velopackProject?.Name))
             {
                 Serilog.Log.Warning("VelopackProjectName not provided, skipping building...");
                 Assert.False(true, "VelopackProjectName not provided");
@@ -78,8 +85,15 @@ public interface IVelopack : INukeBuild, IHasSolution, IHasConfiguration, IHasGi
         .Description("Build Velopack release package")
         .Executes(() =>
         {
+            if (string.IsNullOrEmpty(VelopackProjectName))
+            {
+                Serilog.Log.Warning("VelopackProjectName not provided, skipping building...");
+                Assert.False(true, "VelopackProjectName not provided");
+                return;
+            }
+
             var velopackProject = Solution.GetProject(VelopackProjectName);
-            if (string.IsNullOrEmpty(velopackProject?.Name) || string.IsNullOrEmpty(VelopackProjectName))
+            if (string.IsNullOrEmpty(velopackProject?.Name))
             {
                 Serilog.Log.Warning("VelopackProjectName not provided, skipping building...");
                 Assert.False(true, "VelopackProjectName not provided");

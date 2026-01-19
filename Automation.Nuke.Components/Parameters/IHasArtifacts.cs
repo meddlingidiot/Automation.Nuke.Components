@@ -10,5 +10,5 @@ public interface IHasArtifacts : INukeBuild
     AbsolutePath CoverageReportDirectory => ArtifactsDirectoryParam / "coverage-report";
     AbsolutePath TestResultDirectory => ArtifactsDirectoryParam / "test-results";
     AbsolutePath PackagePublishDirectory => ArtifactsDirectoryParam / "packages";
-    AbsolutePath VelopackPublishDirectory => ArtifactsDirectoryParam / "velopack";
+    AbsolutePath VelopackPublishDirectory => RootDirectory / ".tmp" / "velopack";
 }
