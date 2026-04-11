@@ -72,7 +72,6 @@ public interface ITestExecution : INukeBuild, IHasSolution, IHasConfiguration, I
             {
                 var testExe = project.Directory / "bin" / Configuration / tfm / (project.Name + ext);
                 var coverageOutput = TestResultDirectory / project.Name / tfm / "coverage.cobertura.xml";
-                var trxOutput = TestResultDirectory / $"{project.Name}-{tfm}.trx";
 
                 (TestResultDirectory / project.Name / tfm).CreateDirectory();
 
@@ -84,7 +83,8 @@ public interface ITestExecution : INukeBuild, IHasSolution, IHasConfiguration, I
                     $"--coverage-output-format cobertura " +
                     $"--coverage-output \"{coverageOutput}\" " +
                     $"--report-trx " +
-                    $"--report-trx-filename \"{trxOutput}\"",
+                    $"--report-trx-filename \"{project.Name}-{tfm}.trx\" " +
+                    $"--results-directory \"{TestResultDirectory}\"",
                     workingDirectory: project.Directory,
                     logOutput: true
                 ).AssertZeroExitCode();
