@@ -16,8 +16,6 @@ public interface IUpdateChangelog : INukeBuild, IHasGitVersion, IHasArtifacts
     AbsolutePath ChangelogPath => RootDirectory / "CHANGELOG.md";
 
     Target UpdateChangelog => t => t
-        .After<ITest>(x => x.Test)
-        .After<ITUnitTest>(x => x.Test)
         .Description("Update changelog from git history")
         .Executes(() =>
         {

@@ -21,6 +21,7 @@ public interface ITUnitTest : IRunTUnitUnitTests, IRunTUnitIntegrationTests, IGe
     Target Test => t => t
         .DependsOn<IScanForSecrets>(x => x.ScanForSecrets)
         .DependsOn<IGenerateTUnitCoverageReport>(x => x.CoverageReport)
+        .Before<IUpdateChangelog>(x => x.UpdateChangelog)
         .Description("Run all TUnit tests with coverage")
         .Executes(() => { });
 }

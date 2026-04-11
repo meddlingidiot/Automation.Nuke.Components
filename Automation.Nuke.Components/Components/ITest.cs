@@ -31,6 +31,7 @@ public interface ITest : IRunUnitTests, IRunIntegrationTests, IGenerateCoverageR
     Target Test => t => t
         .DependsOn<IScanForSecrets>(x => x.ScanForSecrets)
         .DependsOn<IGenerateCoverageReport>(x => x.CoverageReport)
+        .Before<IUpdateChangelog>(x => x.UpdateChangelog)
         .Description("Run all tests with coverage")
         .Executes(() => { });
 }
