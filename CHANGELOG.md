@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 1.0.19
+
+### 📝 Other Changes
+
+- More adding of TUnit ([0f48bf6](../../commit/0f48bf6))
+
+## [1.0.18] - 2026-04-10
+
+### 📝 Other Changes
+
+- Add TUnit support ([a4feb20](../../commit/a4feb20))
+
+## [1.0.17] - 2026-04-10
+
+### 🔧 Chores
+
+- chore: Skip NuGet push for non-server builds unless `--force-tag-release` is specified ([d58b42f](../../commit/d58b42f))
+
 ## [1.0.16] - 2026-02-06
 
 ### 🔧 Chores
