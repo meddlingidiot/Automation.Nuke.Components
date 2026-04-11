@@ -17,6 +17,7 @@ public interface IUpdateChangelog : INukeBuild, IHasGitVersion, IHasArtifacts
 
     Target UpdateChangelog => t => t
         .After<ITest>(x => x.Test)
+        .After<ITUnitTest>(x => x.Test)
         .Description("Update changelog from git history")
         .Executes(() =>
         {
