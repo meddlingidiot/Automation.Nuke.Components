@@ -36,6 +36,12 @@ public interface IPackage : INukeBuild, IVelopack, IHasSolution, IHasConfigurati
         .Description("Deploy NuGet packages to GitHub Packages")
         .Executes(() =>
         {
+            if (!IsServerBuild && !ForceTagRelease)
+            {
+                Serilog.Log.Information("Skipping NuGet push — not a server build. Use --force-tag-release to push locally.");
+                return;
+            }
+
             Serilog.Log.Information("Deploying NuGet packages to GitHub Packages...");
 
             var currentBranch = GitTasks.GitCurrentBranch();
