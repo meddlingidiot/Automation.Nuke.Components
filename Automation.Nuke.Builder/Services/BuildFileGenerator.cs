@@ -35,7 +35,12 @@ public static class BuildFileGenerator
 
         // Generate Main method
         var targets = GenerateTargets(buildInfo);
-        if (targets.Count == 1)
+        if (targets.Count == 0)
+        {
+            sb.AppendLine($"    public static int Main() => Execute<Build>(");
+            sb.AppendLine($"        );");
+        }
+        else if (targets.Count == 1)
         {
             sb.AppendLine($"    public static int Main() => Execute<Build>(");
             sb.AppendLine($"        {targets[0]});");
@@ -116,7 +121,9 @@ public static class BuildFileGenerator
                 "IRunIntegrationTests", "IGenerateCoverageReport", "ITest", 
                 "IUpdateChangelog", "IPackage", "IVelopack", "ITagRelease", "IAnnounceRelease"
             },
-            _ => new List<string>()
+            _ => new List<string>   {
+            "IHasGitHubPackages", "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets"
+            }
         };
     }
 

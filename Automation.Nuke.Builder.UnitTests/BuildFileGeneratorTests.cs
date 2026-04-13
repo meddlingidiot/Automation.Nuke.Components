@@ -27,7 +27,7 @@ public class BuildFileGeneratorTests
         {
             await Assert.That(result).Contains("using Nuke.Common;");
             await Assert.That(result).Contains("using Automation.Nuke.Components;");
-            await Assert.That(result).Contains("public class Build : AzurePipelinesBuild, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets");
+            await Assert.That(result).Contains("public class Build : GitHubActionsBuild, IHasGitHubPackages, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets");
             await Assert.That(result).Contains("public static int Main() => Execute<Build>(");
             await Assert.That(result).Contains("x => ((ICompile)x).Compile);");
         }
@@ -328,8 +328,8 @@ public class BuildFileGeneratorTests
 
         using (Assert.Multiple())
         {
-            await Assert.That(result).Contains("public class Build : AzurePipelinesBuild, ");
-            await Assert.That(result).DoesNotContain("ICompile");
+            await Assert.That(result).Contains("public class Build : GitHubActionsBuild, ");
+            await Assert.That(result).Contains("ICompile");
             await Assert.That(result).DoesNotContain("ITest");
         }
     }
