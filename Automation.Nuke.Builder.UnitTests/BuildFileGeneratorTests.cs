@@ -5,10 +5,9 @@ namespace Automation.Nuke.Builder.UnitTests;
 
 public class BuildFileGeneratorTests
 {
-    [Fact]
-    public void GenerateBuildFile_CompileBuild_GeneratesCorrectOutput()
+    [Test]
+    public async Task GenerateBuildFile_CompileBuild_GeneratesCorrectOutput()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "CompileBuild"
@@ -22,21 +21,21 @@ public class BuildFileGeneratorTests
             RequiresVelopack = false
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.Contains("using Nuke.Common;", result);
-        Assert.Contains("using Automation.Nuke.Components;", result);
-        Assert.Contains("public class Build : GitHubActionsBuild, IHasGitHubPackages, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets", result);
-        Assert.Contains("public static int Main() => Execute<Build>(", result);
-        Assert.Contains("x => ((ICompile)x).Compile);", result);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).Contains("using Nuke.Common;");
+            await Assert.That(result).Contains("using Automation.Nuke.Components;");
+            await Assert.That(result).Contains("public class Build : AzurePipelinesBuild, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets");
+            await Assert.That(result).Contains("public static int Main() => Execute<Build>(");
+            await Assert.That(result).Contains("x => ((ICompile)x).Compile);");
+        }
     }
 
-    [Fact]
-    public void GenerateBuildFile_TestBuild_GeneratesCorrectOutput()
+    [Test]
+    public async Task GenerateBuildFile_TestBuild_GeneratesCorrectOutput()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "TestBuild"
@@ -50,19 +49,19 @@ public class BuildFileGeneratorTests
             RequiresVelopack = false
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.Contains("IShowVersion, IClean, ICompile, IRestore, IScanForSecrets, IRunUnitTests", result);
-        Assert.Contains("IRunIntegrationTests, IGenerateCoverageReport, ITest", result);
-        Assert.Contains("x => ((ITest)x).Test);", result);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).Contains("IShowVersion, IClean, ICompile, IRestore, IScanForSecrets, IRunUnitTests");
+            await Assert.That(result).Contains("IRunIntegrationTests, IGenerateCoverageReport, ITest");
+            await Assert.That(result).Contains("x => ((ITest)x).Test);");
+        }
     }
 
-    [Fact]
-    public void GenerateBuildFile_PackageBuild_GeneratesCorrectOutput()
+    [Test]
+    public async Task GenerateBuildFile_PackageBuild_GeneratesCorrectOutput()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "PackageBuild"
@@ -76,18 +75,18 @@ public class BuildFileGeneratorTests
             RequiresVelopack = false
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.Contains("IUpdateChangelog, IPackage, ITagRelease, IAnnounceRelease", result);
-        Assert.Contains("x => ((IPackage)x).ReleasePackage);", result);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).Contains("IUpdateChangelog, IPackage, ITagRelease, IAnnounceRelease");
+            await Assert.That(result).Contains("x => ((IPackage)x).ReleasePackage);");
+        }
     }
 
-    [Fact]
-    public void GenerateBuildFile_VelopackBuild_GeneratesCorrectOutput()
+    [Test]
+    public async Task GenerateBuildFile_VelopackBuild_GeneratesCorrectOutput()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "VelopackBuild",
@@ -102,19 +101,19 @@ public class BuildFileGeneratorTests
             RequiresVelopack = true
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.Contains("IUpdateChangelog, IVelopack, ITagRelease, IAnnounceRelease", result);
-        Assert.Contains("y => ((IVelopack)y).ReleaseVelopack);", result);
-        Assert.Contains("string IHasVelopack.VelopackProjectName => \"MyApp\";", result);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).Contains("IUpdateChangelog, IVelopack, ITagRelease, IAnnounceRelease");
+            await Assert.That(result).Contains("y => ((IVelopack)y).ReleaseVelopack);");
+            await Assert.That(result).Contains("string IHasVelopack.VelopackProjectName => \"MyApp\";");
+        }
     }
 
-    [Fact]
-    public void GenerateBuildFile_VelopackBuild_WithIcon_GeneratesCorrectOutput()
+    [Test]
+    public async Task GenerateBuildFile_VelopackBuild_WithIcon_GeneratesCorrectOutput()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "VelopackBuild",
@@ -130,18 +129,18 @@ public class BuildFileGeneratorTests
             RequiresVelopack = true
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.Contains("string IHasVelopack.VelopackProjectName => \"MyApp\";", result);
-        Assert.Contains("string IHasVelopack.VelopackIconPath => @\"icon.ico\";", result);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).Contains("string IHasVelopack.VelopackProjectName => \"MyApp\";");
+            await Assert.That(result).Contains("string IHasVelopack.VelopackIconPath => @\"icon.ico\";");
+        }
     }
 
-    [Fact]
-    public void GenerateBuildFile_PackageAndVelopackBuild_GeneratesCorrectOutput()
+    [Test]
+    public async Task GenerateBuildFile_PackageAndVelopackBuild_GeneratesCorrectOutput()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "PackageAndVelopackBuild",
@@ -156,19 +155,19 @@ public class BuildFileGeneratorTests
             RequiresVelopack = true
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.Contains("IUpdateChangelog, IPackage, IVelopack, ITagRelease, IAnnounceRelease", result);
-        Assert.Contains("x => ((IPackage)x).ReleasePackage,", result);
-        Assert.Contains("y => ((IVelopack)y).ReleaseVelopack);", result);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).Contains("IUpdateChangelog, IPackage, IVelopack, ITagRelease, IAnnounceRelease");
+            await Assert.That(result).Contains("x => ((IPackage)x).ReleasePackage,");
+            await Assert.That(result).Contains("y => ((IVelopack)y).ReleaseVelopack);");
+        }
     }
 
-    [Fact]
-    public void GenerateBuildFile_WithCodeCoverage_GeneratesMinCoverageThreshold()
+    [Test]
+    public async Task GenerateBuildFile_WithCodeCoverage_GeneratesMinCoverageThreshold()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "TestBuild",
@@ -182,17 +181,14 @@ public class BuildFileGeneratorTests
             RequiresTests = true
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.Contains("int IHasTests.MinCoverageThreshold => 80;", result);
+        await Assert.That(result).Contains("int IHasTests.MinCoverageThreshold => 80;");
     }
 
-    [Fact]
-    public void GenerateBuildFile_WithoutCodeCoverage_DoesNotGenerateMinCoverageThreshold()
+    [Test]
+    public async Task GenerateBuildFile_WithoutCodeCoverage_DoesNotGenerateMinCoverageThreshold()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "TestBuild",
@@ -206,17 +202,14 @@ public class BuildFileGeneratorTests
             RequiresTests = true
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.DoesNotContain("int IHasTests.MinCoverageThreshold", result);
+        await Assert.That(result).DoesNotContain("int IHasTests.MinCoverageThreshold");
     }
 
-    [Fact]
-    public void GenerateBuildFile_BreakBuildOnWarningsFalse_GeneratesOverride()
+    [Test]
+    public async Task GenerateBuildFile_BreakBuildOnWarningsFalse_GeneratesOverride()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "TestBuild",
@@ -229,17 +222,14 @@ public class BuildFileGeneratorTests
             RequiresTests = true
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.Contains("bool IHasTests.BreakBuildOnWarnings => false;", result);
+        await Assert.That(result).Contains("bool IHasTests.BreakBuildOnWarnings => false;");
     }
 
-    [Fact]
-    public void GenerateBuildFile_BreakBuildOnWarningsTrue_DoesNotGenerateOverride()
+    [Test]
+    public async Task GenerateBuildFile_BreakBuildOnWarningsTrue_DoesNotGenerateOverride()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "TestBuild",
@@ -252,17 +242,14 @@ public class BuildFileGeneratorTests
             RequiresTests = true
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.DoesNotContain("bool IHasTests.BreakBuildOnWarnings => false;", result);
+        await Assert.That(result).DoesNotContain("bool IHasTests.BreakBuildOnWarnings => false;");
     }
 
-    [Fact]
-    public void GenerateBuildFile_BreakBuildOnSecretLeaksFalse_GeneratesOverride()
+    [Test]
+    public async Task GenerateBuildFile_BreakBuildOnSecretLeaksFalse_GeneratesOverride()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "TestBuild",
@@ -275,17 +262,14 @@ public class BuildFileGeneratorTests
             RequiresTests = true
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.Contains("bool IHasTests.BreakBuildOnSecretLeaks => false;", result);
+        await Assert.That(result).Contains("bool IHasTests.BreakBuildOnSecretLeaks => false;");
     }
 
-    [Fact]
-    public void GenerateBuildFile_BreakBuildOnSecretLeaksTrue_DoesNotGenerateOverride()
+    [Test]
+    public async Task GenerateBuildFile_BreakBuildOnSecretLeaksTrue_DoesNotGenerateOverride()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "TestBuild",
@@ -298,17 +282,14 @@ public class BuildFileGeneratorTests
             RequiresTests = true
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.DoesNotContain("bool IHasTests.BreakBuildOnSecretLeaks => false;", result);
+        await Assert.That(result).DoesNotContain("bool IHasTests.BreakBuildOnSecretLeaks => false;");
     }
 
-    [Fact]
-    public void GenerateBuildFile_ContainsXmlDocComments()
+    [Test]
+    public async Task GenerateBuildFile_ContainsXmlDocComments()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "CompileBuild"
@@ -319,20 +300,20 @@ public class BuildFileGeneratorTests
             Description = "Compile only build"
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.Contains("/// <summary>", result);
-        Assert.Contains("/// Build configuration for CompileBuild", result);
-        Assert.Contains("/// </summary>", result);
-        Assert.Contains("/// Support plugins are available for:", result);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).Contains("/// <summary>");
+            await Assert.That(result).Contains("/// Build configuration for CompileBuild");
+            await Assert.That(result).Contains("/// </summary>");
+            await Assert.That(result).Contains("/// Support plugins are available for:");
+        }
     }
 
-    [Fact]
-    public void GenerateBuildFile_UnknownBuildType_GeneratesEmptyInterfaces()
+    [Test]
+    public async Task GenerateBuildFile_UnknownBuildType_GeneratesEmptyInterfaces()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "UnknownBuild"
@@ -343,19 +324,19 @@ public class BuildFileGeneratorTests
             Description = "Unknown build"
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.Contains("public class Build : GitHubActionsBuild, ", result);
-        Assert.DoesNotContain("ICompile", result);
-        Assert.DoesNotContain("ITest", result);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).Contains("public class Build : AzurePipelinesBuild, ");
+            await Assert.That(result).DoesNotContain("ICompile");
+            await Assert.That(result).DoesNotContain("ITest");
+        }
     }
 
-    [Fact]
-    public void GenerateBuildFile_WithZeroMinCodeCoverage_DoesNotGenerateThreshold()
+    [Test]
+    public async Task GenerateBuildFile_WithZeroMinCodeCoverage_DoesNotGenerateThreshold()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "TestBuild",
@@ -369,17 +350,14 @@ public class BuildFileGeneratorTests
             RequiresTests = true
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.DoesNotContain("int IHasTests.MinCoverageThreshold", result);
+        await Assert.That(result).DoesNotContain("int IHasTests.MinCoverageThreshold");
     }
 
-    [Fact]
-    public void GenerateBuildFile_VelopackWithoutProjectName_DoesNotGenerateVelopackProperties()
+    [Test]
+    public async Task GenerateBuildFile_VelopackWithoutProjectName_DoesNotGenerateVelopackProperties()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "VelopackBuild",
@@ -392,18 +370,18 @@ public class BuildFileGeneratorTests
             RequiresVelopack = true
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.DoesNotContain("string IHasVelopack.VelopackProjectName", result);
-        Assert.DoesNotContain("string IHasVelopack.VelopackIconPath", result);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).DoesNotContain("string IHasVelopack.VelopackProjectName");
+            await Assert.That(result).DoesNotContain("string IHasVelopack.VelopackIconPath");
+        }
     }
 
-    [Fact]
-    public void GenerateBuildFile_VelopackWithEmptyIconPath_DoesNotGenerateIconProperty()
+    [Test]
+    public async Task GenerateBuildFile_VelopackWithEmptyIconPath_DoesNotGenerateIconProperty()
     {
-        // Arrange
         var config = new BuildConfiguration
         {
             BuildType = "VelopackBuild",
@@ -417,11 +395,12 @@ public class BuildFileGeneratorTests
             RequiresVelopack = true
         };
 
-        // Act
         var result = BuildFileGenerator.GenerateBuildFile(config, buildInfo);
 
-        // Assert
-        Assert.Contains("string IHasVelopack.VelopackProjectName => \"MyApp\";", result);
-        Assert.DoesNotContain("string IHasVelopack.VelopackIconPath", result);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).Contains("string IHasVelopack.VelopackProjectName => \"MyApp\";");
+            await Assert.That(result).DoesNotContain("string IHasVelopack.VelopackIconPath");
+        }
     }
 }

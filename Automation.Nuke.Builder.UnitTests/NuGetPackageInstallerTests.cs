@@ -3,7 +3,7 @@ using Automation.Nuke.Builder.Services;
 
 namespace Automation.Nuke.Builder.UnitTests;
 
-public class NuGetPackageInstallerTests : IDisposable
+public class NuGetPackageInstallerTests : IAsyncDisposable
 {
     private readonly string _testDirectory;
     private readonly List<string> _filesToCleanup;
@@ -15,7 +15,7 @@ public class NuGetPackageInstallerTests : IDisposable
         _filesToCleanup = new List<string>();
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
         foreach (var file in _filesToCleanup)
         {
@@ -29,6 +29,8 @@ public class NuGetPackageInstallerTests : IDisposable
         {
             try { Directory.Delete(_testDirectory, true); } catch { /* Ignore cleanup errors */ }
         }
+
+        return ValueTask.CompletedTask;
     }
 
     private string CreateTestProjectFile(string targetFramework = "net8.0")
@@ -46,86 +48,79 @@ public class NuGetPackageInstallerTests : IDisposable
 
     #region UpgradeProjectTargetFrameworkAsync Tests
 
-    [Fact]
+    [Test]
     public async Task UpgradeProjectTargetFrameworkAsync_ValidProject_UpgradesFramework()
     {
-        // Arrange
         var projectPath = CreateTestProjectFile("net8.0");
 
-        // Act
         var result = await NuGetPackageInstaller.UpgradeProjectTargetFrameworkAsync(projectPath, "net10.0");
 
-        // Assert
-        Assert.True(result);
         var doc = XDocument.Load(projectPath);
         var targetFramework = doc.Descendants("TargetFramework").First().Value;
-        Assert.Equal("net10.0", targetFramework);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).IsTrue();
+            await Assert.That(targetFramework).IsEqualTo("net10.0");
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task UpgradeProjectTargetFrameworkAsync_AlreadyCorrectFramework_ReturnsTrue()
     {
-        // Arrange
         var projectPath = CreateTestProjectFile("net10.0");
 
-        // Act
         var result = await NuGetPackageInstaller.UpgradeProjectTargetFrameworkAsync(projectPath, "net10.0");
 
-        // Assert
-        Assert.True(result);
         var doc = XDocument.Load(projectPath);
         var targetFramework = doc.Descendants("TargetFramework").First().Value;
-        Assert.Equal("net10.0", targetFramework);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).IsTrue();
+            await Assert.That(targetFramework).IsEqualTo("net10.0");
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task UpgradeProjectTargetFrameworkAsync_CustomFramework_UpgradesCorrectly()
     {
-        // Arrange
         var projectPath = CreateTestProjectFile("net6.0");
 
-        // Act
         var result = await NuGetPackageInstaller.UpgradeProjectTargetFrameworkAsync(projectPath, "net9.0");
 
-        // Assert
-        Assert.True(result);
         var doc = XDocument.Load(projectPath);
         var targetFramework = doc.Descendants("TargetFramework").First().Value;
-        Assert.Equal("net9.0", targetFramework);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).IsTrue();
+            await Assert.That(targetFramework).IsEqualTo("net9.0");
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task UpgradeProjectTargetFrameworkAsync_NonExistentFile_ReturnsFalse()
     {
-        // Arrange
         var projectPath = Path.Combine(_testDirectory, "nonexistent.csproj");
 
-        // Act
         var result = await NuGetPackageInstaller.UpgradeProjectTargetFrameworkAsync(projectPath);
 
-        // Assert
-        Assert.False(result);
+        await Assert.That(result).IsFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task UpgradeProjectTargetFrameworkAsync_InvalidXml_ReturnsFalse()
     {
-        // Arrange
         var projectPath = Path.Combine(_testDirectory, $"invalid_{Guid.NewGuid()}.csproj");
         File.WriteAllText(projectPath, "This is not valid XML");
         _filesToCleanup.Add(projectPath);
 
-        // Act
         var result = await NuGetPackageInstaller.UpgradeProjectTargetFrameworkAsync(projectPath);
 
-        // Assert
-        Assert.False(result);
+        await Assert.That(result).IsFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task UpgradeProjectTargetFrameworkAsync_MissingTargetFramework_ReturnsFalse()
     {
-        // Arrange
         var projectPath = Path.Combine(_testDirectory, $"noframework_{Guid.NewGuid()}.csproj");
         var content = @"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
@@ -134,321 +129,304 @@ public class NuGetPackageInstallerTests : IDisposable
         File.WriteAllText(projectPath, content);
         _filesToCleanup.Add(projectPath);
 
-        // Act
         var result = await NuGetPackageInstaller.UpgradeProjectTargetFrameworkAsync(projectPath);
 
-        // Assert
-        Assert.False(result);
+        await Assert.That(result).IsFalse();
     }
 
     #endregion
 
     #region AddPackageDownloadAsync Tests
 
-    [Fact]
+    [Test]
     public async Task AddPackageDownloadAsync_NewPackage_AddsSuccessfully()
     {
-        // Arrange
         var projectPath = CreateTestProjectFile();
 
-        // Act
         var result = await NuGetPackageInstaller.AddPackageDownloadAsync(projectPath, "TestPackage", "1.0.0");
 
-        // Assert
-        Assert.True(result);
         var doc = XDocument.Load(projectPath);
         var packageDownload = doc.Descendants("PackageDownload")
             .FirstOrDefault(p => p.Attribute("Include")?.Value == "TestPackage");
-        Assert.NotNull(packageDownload);
-        Assert.Equal("[1.0.0]", packageDownload.Attribute("Version")?.Value);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).IsTrue();
+            await Assert.That(packageDownload).IsNotNull();
+            await Assert.That(packageDownload!.Attribute("Version")?.Value).IsEqualTo("[1.0.0]");
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task AddPackageDownloadAsync_ExistingPackageSameVersion_ReturnsTrue()
     {
-        // Arrange
         var projectPath = CreateTestProjectFile();
         await NuGetPackageInstaller.AddPackageDownloadAsync(projectPath, "TestPackage", "1.0.0");
 
-        // Act
         var result = await NuGetPackageInstaller.AddPackageDownloadAsync(projectPath, "TestPackage", "1.0.0");
 
-        // Assert
-        Assert.True(result);
         var doc = XDocument.Load(projectPath);
         var packageDownloads = doc.Descendants("PackageDownload")
             .Where(p => p.Attribute("Include")?.Value == "TestPackage")
             .ToList();
-        Assert.Single(packageDownloads);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).IsTrue();
+            await Assert.That(packageDownloads.Count).IsEqualTo(1);
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task AddPackageDownloadAsync_ExistingPackageDifferentVersion_UpdatesVersion()
     {
-        // Arrange
         var projectPath = CreateTestProjectFile();
         await NuGetPackageInstaller.AddPackageDownloadAsync(projectPath, "TestPackage", "1.0.0");
 
-        // Act
         var result = await NuGetPackageInstaller.AddPackageDownloadAsync(projectPath, "TestPackage", "2.0.0");
 
-        // Assert
-        Assert.True(result);
         var doc = XDocument.Load(projectPath);
         var packageDownload = doc.Descendants("PackageDownload")
             .FirstOrDefault(p => p.Attribute("Include")?.Value == "TestPackage");
-        Assert.NotNull(packageDownload);
-        Assert.Equal("[2.0.0]", packageDownload.Attribute("Version")?.Value);
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).IsTrue();
+            await Assert.That(packageDownload).IsNotNull();
+            await Assert.That(packageDownload!.Attribute("Version")?.Value).IsEqualTo("[2.0.0]");
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task AddPackageDownloadAsync_MultiplePackages_AddsAll()
     {
-        // Arrange
         var projectPath = CreateTestProjectFile();
 
-        // Act
         await NuGetPackageInstaller.AddPackageDownloadAsync(projectPath, "Package1", "1.0.0");
         await NuGetPackageInstaller.AddPackageDownloadAsync(projectPath, "Package2", "2.0.0");
         var result = await NuGetPackageInstaller.AddPackageDownloadAsync(projectPath, "Package3", "3.0.0");
 
-        // Assert
-        Assert.True(result);
         var doc = XDocument.Load(projectPath);
         var packageDownloads = doc.Descendants("PackageDownload").ToList();
-        Assert.Equal(3, packageDownloads.Count);
-        Assert.Contains(packageDownloads, p => p.Attribute("Include")?.Value == "Package1");
-        Assert.Contains(packageDownloads, p => p.Attribute("Include")?.Value == "Package2");
-        Assert.Contains(packageDownloads, p => p.Attribute("Include")?.Value == "Package3");
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).IsTrue();
+            await Assert.That(packageDownloads.Count).IsEqualTo(3);
+            await Assert.That(packageDownloads.Any(p => p.Attribute("Include")?.Value == "Package1")).IsTrue();
+            await Assert.That(packageDownloads.Any(p => p.Attribute("Include")?.Value == "Package2")).IsTrue();
+            await Assert.That(packageDownloads.Any(p => p.Attribute("Include")?.Value == "Package3")).IsTrue();
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task AddPackageDownloadAsync_NonExistentFile_ReturnsFalse()
     {
-        // Arrange
         var projectPath = Path.Combine(_testDirectory, "nonexistent.csproj");
 
-        // Act
         var result = await NuGetPackageInstaller.AddPackageDownloadAsync(projectPath, "TestPackage", "1.0.0");
 
-        // Assert
-        Assert.False(result);
+        await Assert.That(result).IsFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task AddPackageDownloadAsync_InvalidXml_ReturnsFalse()
     {
-        // Arrange
         var projectPath = Path.Combine(_testDirectory, $"invalid_{Guid.NewGuid()}.csproj");
         File.WriteAllText(projectPath, "This is not valid XML");
         _filesToCleanup.Add(projectPath);
 
-        // Act
         var result = await NuGetPackageInstaller.AddPackageDownloadAsync(projectPath, "TestPackage", "1.0.0");
 
-        // Assert
-        Assert.False(result);
+        await Assert.That(result).IsFalse();
     }
 
     #endregion
 
     #region DeleteFileIfExistsAsync Tests
 
-    [Fact]
+    [Test]
     public async Task DeleteFileIfExistsAsync_ExistingFile_DeletesSuccessfully()
     {
-        // Arrange
         var filePath = Path.Combine(_testDirectory, $"testfile_{Guid.NewGuid()}.txt");
         File.WriteAllText(filePath, "test content");
 
-        // Act
         await NuGetPackageInstaller.DeleteFileIfExistsAsync(filePath);
 
-        // Assert
-        Assert.False(File.Exists(filePath));
+        await Assert.That(File.Exists(filePath)).IsFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task DeleteFileIfExistsAsync_NonExistentFile_DoesNotThrow()
     {
-        // Arrange
         var filePath = Path.Combine(_testDirectory, "nonexistent.txt");
 
-        // Act & Assert
         await NuGetPackageInstaller.DeleteFileIfExistsAsync(filePath);
-        Assert.False(File.Exists(filePath));
+
+        await Assert.That(File.Exists(filePath)).IsFalse();
     }
 
     #endregion
 
     #region UpdateGitIgnoreAsync Tests
 
-    [Fact]
+    [Test]
     public async Task UpdateGitIgnoreAsync_NoExistingFile_CreatesWithAllSections()
     {
-        // Arrange
         var gitignorePath = Path.Combine(_testDirectory, ".gitignore");
         _filesToCleanup.Add(gitignorePath);
 
-        // Act
         await NuGetPackageInstaller.UpdateGitIgnoreAsync(_testDirectory);
 
-        // Assert
-        Assert.True(File.Exists(gitignorePath));
         var content = await File.ReadAllTextAsync(gitignorePath);
-        Assert.Contains("# Nuke Build", content);
-        Assert.Contains(".nuke/build.schema.json", content);
-        Assert.Contains(".nuke/temp/", content);
-        Assert.Contains(".tmp/", content);
-        Assert.Contains("artifacts/", content);
-        Assert.Contains("# JetBrains Rider", content);
-        Assert.Contains(".idea/", content);
-        Assert.Contains("# Rider DotSettings", content);
-        Assert.Contains("*.DotSettings", content);
+        using (Assert.Multiple())
+        {
+            await Assert.That(File.Exists(gitignorePath)).IsTrue();
+            await Assert.That(content).Contains("# Nuke Build");
+            await Assert.That(content).Contains(".nuke/build.schema.json");
+            await Assert.That(content).Contains(".nuke/temp/");
+            await Assert.That(content).Contains(".tmp/");
+            await Assert.That(content).Contains("artifacts/");
+            await Assert.That(content).Contains("# JetBrains Rider");
+            await Assert.That(content).Contains(".idea/");
+            await Assert.That(content).Contains("# Rider DotSettings");
+            await Assert.That(content).Contains("*.DotSettings");
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task UpdateGitIgnoreAsync_ExistingFileWithoutSections_AppendsAllSections()
     {
-        // Arrange
         var gitignorePath = Path.Combine(_testDirectory, ".gitignore");
         await File.WriteAllTextAsync(gitignorePath, "bin/\nobj/\n");
         _filesToCleanup.Add(gitignorePath);
 
-        // Act
         await NuGetPackageInstaller.UpdateGitIgnoreAsync(_testDirectory);
 
-        // Assert
         var content = await File.ReadAllTextAsync(gitignorePath);
-        Assert.Contains("bin/", content);
-        Assert.Contains("obj/", content);
-        Assert.Contains("# Nuke Build", content);
-        Assert.Contains("# JetBrains Rider", content);
-        Assert.Contains("# Rider DotSettings", content);
+        using (Assert.Multiple())
+        {
+            await Assert.That(content).Contains("bin/");
+            await Assert.That(content).Contains("obj/");
+            await Assert.That(content).Contains("# Nuke Build");
+            await Assert.That(content).Contains("# JetBrains Rider");
+            await Assert.That(content).Contains("# Rider DotSettings");
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task UpdateGitIgnoreAsync_ExistingFileWithNukeSection_DoesNotDuplicateNuke()
     {
-        // Arrange
         var gitignorePath = Path.Combine(_testDirectory, ".gitignore");
         await File.WriteAllTextAsync(gitignorePath, "# Nuke Build\n.nuke/build.schema.json\n");
         _filesToCleanup.Add(gitignorePath);
 
-        // Act
         await NuGetPackageInstaller.UpdateGitIgnoreAsync(_testDirectory);
 
-        // Assert
         var content = await File.ReadAllTextAsync(gitignorePath);
         var nukeCount = System.Text.RegularExpressions.Regex.Matches(content, "# Nuke Build").Count;
-        Assert.Equal(1, nukeCount);
-        Assert.Contains("# JetBrains Rider", content);
-        Assert.Contains("# Rider DotSettings", content);
+        using (Assert.Multiple())
+        {
+            await Assert.That(nukeCount).IsEqualTo(1);
+            await Assert.That(content).Contains("# JetBrains Rider");
+            await Assert.That(content).Contains("# Rider DotSettings");
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task UpdateGitIgnoreAsync_ExistingFileWithRiderSection_DoesNotDuplicateRider()
     {
-        // Arrange
         var gitignorePath = Path.Combine(_testDirectory, ".gitignore");
         await File.WriteAllTextAsync(gitignorePath, "# JetBrains Rider\n.idea/\n");
         _filesToCleanup.Add(gitignorePath);
 
-        // Act
         await NuGetPackageInstaller.UpdateGitIgnoreAsync(_testDirectory);
 
-        // Assert
         var content = await File.ReadAllTextAsync(gitignorePath);
         var riderCount = System.Text.RegularExpressions.Regex.Matches(content, "# JetBrains Rider").Count;
-        Assert.Equal(1, riderCount);
-        Assert.Contains("# Nuke Build", content);
-        Assert.Contains("# Rider DotSettings", content);
+        using (Assert.Multiple())
+        {
+            await Assert.That(riderCount).IsEqualTo(1);
+            await Assert.That(content).Contains("# Nuke Build");
+            await Assert.That(content).Contains("# Rider DotSettings");
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task UpdateGitIgnoreAsync_ExistingFileWithDotSettingsSection_DoesNotDuplicateDotSettings()
     {
-        // Arrange
         var gitignorePath = Path.Combine(_testDirectory, ".gitignore");
         await File.WriteAllTextAsync(gitignorePath, "# Rider DotSettings\n*.DotSettings\n");
         _filesToCleanup.Add(gitignorePath);
 
-        // Act
         await NuGetPackageInstaller.UpdateGitIgnoreAsync(_testDirectory);
 
-        // Assert
         var content = await File.ReadAllTextAsync(gitignorePath);
         var dotSettingsCount = System.Text.RegularExpressions.Regex.Matches(content, "# Rider DotSettings").Count;
-        Assert.Equal(1, dotSettingsCount);
-        Assert.Contains("# Nuke Build", content);
-        Assert.Contains("# JetBrains Rider", content);
+        using (Assert.Multiple())
+        {
+            await Assert.That(dotSettingsCount).IsEqualTo(1);
+            await Assert.That(content).Contains("# Nuke Build");
+            await Assert.That(content).Contains("# JetBrains Rider");
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task UpdateGitIgnoreAsync_ExistingFileWithAllSections_DoesNotModify()
     {
-        // Arrange
         var gitignorePath = Path.Combine(_testDirectory, ".gitignore");
         var originalContent = "# Nuke Build\n.nuke/\n# JetBrains Rider\n.idea/\n# Rider DotSettings\n*.DotSettings\n";
         await File.WriteAllTextAsync(gitignorePath, originalContent);
         _filesToCleanup.Add(gitignorePath);
 
-        // Act
         await NuGetPackageInstaller.UpdateGitIgnoreAsync(_testDirectory);
 
-        // Assert
         var content = await File.ReadAllTextAsync(gitignorePath);
-        Assert.Equal(originalContent, content);
+        await Assert.That(content).IsEqualTo(originalContent);
     }
 
-    [Fact]
+    [Test]
     public async Task UpdateGitIgnoreAsync_FileWithoutTrailingNewline_AddsNewlineBeforeAppending()
     {
-        // Arrange
         var gitignorePath = Path.Combine(_testDirectory, ".gitignore");
         await File.WriteAllTextAsync(gitignorePath, "bin/");
         _filesToCleanup.Add(gitignorePath);
 
-        // Act
         await NuGetPackageInstaller.UpdateGitIgnoreAsync(_testDirectory);
 
-        // Assert
         var content = await File.ReadAllTextAsync(gitignorePath);
-        Assert.StartsWith("bin/", content);
-        Assert.Contains("# Nuke Build", content);
-        // Ensure proper spacing
         var lines = content.Split('\n');
-        Assert.True(lines.Length > 1);
+        using (Assert.Multiple())
+        {
+            await Assert.That(content).StartsWith("bin/");
+            await Assert.That(content).Contains("# Nuke Build");
+            await Assert.That(lines.Length > 1).IsTrue();
+        }
     }
 
     #endregion
 
     #region Edge Cases and Validation Tests
 
-    [Fact]
+    [Test]
     public async Task AddPackageDownloadAsync_EmptyProjectFile_CreatesItemGroup()
     {
-        // Arrange
         var projectPath = Path.Combine(_testDirectory, $"empty_{Guid.NewGuid()}.csproj");
         File.WriteAllText(projectPath, "<Project />");
         _filesToCleanup.Add(projectPath);
 
-        // Act
         var result = await NuGetPackageInstaller.AddPackageDownloadAsync(projectPath, "TestPackage", "1.0.0");
 
-        // Assert
-        Assert.True(result);
         var doc = XDocument.Load(projectPath);
         var itemGroup = doc.Descendants("ItemGroup").FirstOrDefault();
-        Assert.NotNull(itemGroup);
-        var packageDownload = itemGroup.Elements("PackageDownload").FirstOrDefault();
-        Assert.NotNull(packageDownload);
+        var packageDownload = itemGroup!.Elements("PackageDownload").FirstOrDefault();
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).IsTrue();
+            await Assert.That(itemGroup).IsNotNull();
+            await Assert.That(packageDownload).IsNotNull();
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task UpgradeProjectTargetFrameworkAsync_PreservesOtherElements()
     {
-        // Arrange
         var projectPath = Path.Combine(_testDirectory, $"complex_{Guid.NewGuid()}.csproj");
         var content = @"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
@@ -463,22 +441,22 @@ public class NuGetPackageInstallerTests : IDisposable
         File.WriteAllText(projectPath, content);
         _filesToCleanup.Add(projectPath);
 
-        // Act
         var result = await NuGetPackageInstaller.UpgradeProjectTargetFrameworkAsync(projectPath, "net10.0");
 
-        // Assert
-        Assert.True(result);
         var doc = XDocument.Load(projectPath);
-        Assert.Equal("net10.0", doc.Descendants("TargetFramework").First().Value);
-        Assert.Equal("Exe", doc.Descendants("OutputType").First().Value);
-        Assert.Equal("enable", doc.Descendants("Nullable").First().Value);
-        Assert.NotNull(doc.Descendants("PackageReference").FirstOrDefault());
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).IsTrue();
+            await Assert.That(doc.Descendants("TargetFramework").First().Value).IsEqualTo("net10.0");
+            await Assert.That(doc.Descendants("OutputType").First().Value).IsEqualTo("Exe");
+            await Assert.That(doc.Descendants("Nullable").First().Value).IsEqualTo("enable");
+            await Assert.That(doc.Descendants("PackageReference").FirstOrDefault()).IsNotNull();
+        }
     }
 
-    [Fact]
+    [Test]
     public async Task AddPackageDownloadAsync_PreservesExistingItemGroups()
     {
-        // Arrange
         var projectPath = Path.Combine(_testDirectory, $"withitems_{Guid.NewGuid()}.csproj");
         var content = @"<Project Sdk=""Microsoft.NET.Sdk"">
   <PropertyGroup>
@@ -491,16 +469,17 @@ public class NuGetPackageInstallerTests : IDisposable
         File.WriteAllText(projectPath, content);
         _filesToCleanup.Add(projectPath);
 
-        // Act
         var result = await NuGetPackageInstaller.AddPackageDownloadAsync(projectPath, "TestPackage", "1.0.0");
 
-        // Assert
-        Assert.True(result);
         var doc = XDocument.Load(projectPath);
         var itemGroups = doc.Descendants("ItemGroup").ToList();
-        Assert.True(itemGroups.Count >= 1);
-        Assert.NotNull(doc.Descendants("PackageReference").FirstOrDefault());
-        Assert.NotNull(doc.Descendants("PackageDownload").FirstOrDefault());
+        using (Assert.Multiple())
+        {
+            await Assert.That(result).IsTrue();
+            await Assert.That(itemGroups.Count >= 1).IsTrue();
+            await Assert.That(doc.Descendants("PackageReference").FirstOrDefault()).IsNotNull();
+            await Assert.That(doc.Descendants("PackageDownload").FirstOrDefault()).IsNotNull();
+        }
     }
 
     #endregion
