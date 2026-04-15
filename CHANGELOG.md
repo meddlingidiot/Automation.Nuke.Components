@@ -6,6 +6,19 @@ All notable changes to this project will be documented in this file.
 
 ### 📝 Other Changes
 
+- Switch Build to ReleasePackage mode and clean up commented code ([59a9b67](../../commit/59a9b67))
+- Add Codecov support with upload functionality and README badge ([63b4eb9](../../commit/63b4eb9))
+- Update LICENSE file with clarifications and additional guidance ([ae68e4e](../../commit/ae68e4e))
+- Add LICENSE file to solution and clean up redundant license text ([de2ed4f](../../commit/de2ed4f))
+- Switch BuildFileGenerator to use GitHubActionsBuild and add GitHub-specific interfaces ([fc388fe](../../commit/fc388fe))
+- Enable Microsoft Testing Platform and remove Codecov badge from README.md ([fde5d99](../../commit/fde5d99))
+- Remove first attempt of TUnit test infrastructure and switched to it for the unit tests. ([9d221ca](../../commit/9d221ca))
+- Add interfaces for TUnit test execution components with shared logic ([b7bd857](../../commit/b7bd857))
+- Remove TUnit test infrastructure and add Apache 2.0 license file ([b12eebf](../../commit/b12eebf))
+- try again ([1b540a1](../../commit/1b540a1))
+- trying something else for running MTP tests ([cccee67](../../commit/cccee67))
+- again ([be6adb0](../../commit/be6adb0))
+- TUnit support still ([d50f3ac](../../commit/d50f3ac))
 - More adding of TUnit ([0f48bf6](../../commit/0f48bf6))
 
 ## [1.0.18] - 2026-04-10

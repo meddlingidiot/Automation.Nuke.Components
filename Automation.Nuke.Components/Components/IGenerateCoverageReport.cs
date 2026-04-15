@@ -71,18 +71,21 @@ public interface IGenerateCoverageReport : INukeBuild, IHasTests, IHasArtifacts
         var slug = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
                    ?? ParseSlugFromRemote();
 
-        var query = $"commit={Uri.EscapeDataString(commit)}&branch={Uri.EscapeDataString(branch)}";
+        var query = $"commit={Uri.EscapeDataString(commit)}&branch={Uri.EscapeDataString(branch)}&service=github";
         if (slug is not null)
             query += $"&slug={Uri.EscapeDataString(slug)}";
         if (!string.IsNullOrEmpty(CodecovToken))
             query += $"&token={Uri.EscapeDataString(CodecovToken)}";
+
+        Serilog.Log.Debug("Codecov upload params: commit={Commit}, branch={Branch}, slug={Slug}, hasToken={HasToken}",
+            commit, branch, slug, !string.IsNullOrEmpty(CodecovToken));
 
         using var http = new HttpClient();
         http.DefaultRequestHeaders.Add("Accept", "text/plain");
         http.DefaultRequestHeaders.Add("X-Reduced-Redundancy", "false");
 
         Serilog.Log.Information("Requesting Codecov upload URL...");
-        var response = http.GetAsync($"https://codecov.io/upload/v4?{query}").GetAwaiter().GetResult();
+        var response = http.PostAsync($"https://codecov.io/upload/v4?{query}", new StringContent("")).GetAwaiter().GetResult();
 
         if (!response.IsSuccessStatusCode)
         {
@@ -92,11 +95,21 @@ public interface IGenerateCoverageReport : INukeBuild, IHasTests, IHasArtifacts
 
         var body = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         var lines = body.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        var uploadUrl = lines[0].Trim();
+        // Line 0 = Codecov result/view URL, Line 1 = GCS presigned upload URL
+        if (lines.Length < 2)
+            throw new Exception($"Unexpected Codecov response (expected 2 lines): {body}");
 
+        var resultUrl = lines[0].Trim();
+        var uploadUrl = lines[1].Trim();
+
+        Serilog.Log.Debug("Codecov result URL: {ResultUrl}", resultUrl);
         Serilog.Log.Information("Uploading coverage report to Codecov...");
-        var fileContent = new StringContent(File.ReadAllText(coberturaFile), System.Text.Encoding.UTF8, "text/plain");
-        var putResponse = http.PutAsync(uploadUrl, fileContent).GetAwaiter().GetResult();
+
+        using var request = new HttpRequestMessage(HttpMethod.Put, uploadUrl);
+        request.Content = new ByteArrayContent(File.ReadAllBytes(coberturaFile));
+        request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
+
+        var putResponse = http.SendAsync(request).GetAwaiter().GetResult();
 
         if (!putResponse.IsSuccessStatusCode)
         {
@@ -104,10 +117,7 @@ public interface IGenerateCoverageReport : INukeBuild, IHasTests, IHasArtifacts
             throw new Exception($"Codecov file upload failed ({putResponse.StatusCode}): {error}");
         }
 
-        if (lines.Length > 1)
-            Serilog.Log.Information("Coverage uploaded: {Url}", lines[1].Trim());
-        else
-            Serilog.Log.Information("Coverage uploaded successfully");
+        Serilog.Log.Information("Coverage uploaded: {Url}", resultUrl);
     }
 
     private static string? ParseSlugFromRemote()
