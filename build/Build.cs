@@ -18,9 +18,8 @@ public class Build : GitHubActionsBuild, IShowVersion, IClean, ICompile, IRestor
 {
 
     public static int Main() => Execute<Build>(
-//        x => ((IPackage)x).ReleasePackage);
-        x => ((ICompile)x).Compile);
-
+        x => ((IPackage)x).ReleasePackage);
+        
     string IHasGitHubPackages.GitHubOwner => "meddlingidiot";
     int IHasTests.MinCoverageThreshold => 35;
     bool ITestExecution.UseMicrosoftTestingPlatform => true;
