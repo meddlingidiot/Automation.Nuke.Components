@@ -86,7 +86,7 @@ public interface IGenerateCoverageReport : INukeBuild, IHasTests, IHasArtifacts
         await File.WriteAllBytesAsync(CodecovUploaderPath, bytes);
 
         if (os != "windows")
-            ProcessTasks.StartProcess("chmod", $"+x {CodecovUploaderPath}").AssertZeroExitCode();
+            ProcessTasks.StartProcess("chmod", $"+x \"{CodecovUploaderPath}\"").AssertZeroExitCode();
 
         Serilog.Log.Information("Codecov uploader installed to {Path}", CodecovUploaderPath);
     }
