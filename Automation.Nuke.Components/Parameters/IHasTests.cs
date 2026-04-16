@@ -15,6 +15,6 @@ public interface IHasTests : INukeBuild
     [Parameter("Upload coverage report to Codecov - Default is 'false'. Enable for public repositories.")]
     bool UploadToCodecov => TryGetValue<bool?>(() => UploadToCodecov) ?? false;
 
-    [Parameter("Codecov token for uploading coverage reports")]
+    [Parameter, Secret]
     string? CodecovToken => TryGetValue(() => CodecovToken) ?? Environment.GetEnvironmentVariable("CODECOV_TOKEN");
 }
