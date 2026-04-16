@@ -93,23 +93,11 @@ public interface IGenerateCoverageReport : INukeBuild, IHasTests, IHasArtifacts
 
     private void UploadCoverageToCodecov(AbsolutePath coberturaFile)
     {
-        var args = $"--file \"{coberturaFile}\" --rootDir \"{RootDirectory}\"";
+        // -Z: exit non-zero on upload errors (uploader defaults to exit 0 even on failure)
+        var args = $"--file \"{coberturaFile}\" --rootDir \"{RootDirectory}\" -Z";
 
         if (!string.IsNullOrEmpty(CodecovToken))
             args += $" --token \"{CodecovToken}\"";
-
-        var githubRepo = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY");
-        if (!string.IsNullOrEmpty(githubRepo))
-            args += $" --slug \"{githubRepo}\"";
-
-        var commit = Environment.GetEnvironmentVariable("GITHUB_SHA");
-        if (!string.IsNullOrEmpty(commit))
-            args += $" --sha \"{commit}\"";
-
-        var branch = Environment.GetEnvironmentVariable("GITHUB_HEAD_REF")
-                     ?? Environment.GetEnvironmentVariable("GITHUB_REF_NAME");
-        if (!string.IsNullOrEmpty(branch))
-            args += $" --branch \"{branch}\"";
 
         Serilog.Log.Information("Uploading coverage to Codecov...");
         ProcessTasks.StartProcess(CodecovUploaderPath, args, logOutput: true).AssertZeroExitCode();

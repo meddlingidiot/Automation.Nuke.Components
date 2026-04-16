@@ -89,11 +89,12 @@ jobs:
       - name: Execute Nuke Build
         run: |
           dotnet tool restore
-          dotnet run --project .\build\_build.csproj -- --azure-blob-sas-token "${{ secrets.AZURE_BLOB_SAS_TOKEN }}" --artifacts-directory-param "${{ github.workspace }}\artifacts" --github-owner "${{ github.repository_owner }}"
+          dotnet run --project .\build\_build.csproj -- --azure-blob-sas-token "${{ secrets.AZURE_BLOB_SAS_TOKEN }}" --artifacts-directory-param "${{ github.workspace }}\artifacts" --github-owner "${{ github.repository_owner }}" --upload-to-codecov true
         shell: pwsh
         env:
           AZUREBLOBSASTOKEN: ${{ secrets.AZURE_BLOB_SAS_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       # ----------------------------------------------------------------
       # Publish: NuGet Packages
