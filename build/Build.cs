@@ -24,4 +24,5 @@ public class Build : GitHubActionsBuild, IShowVersion, IClean, ICompile, IRestor
     int IHasTests.MinCoverageThreshold => 35;
     bool ITestExecution.UseMicrosoftTestingPlatform => true;
     bool IHasTests.UploadToCodecov => true;
+    string IHasTests.CodecovToken => "68ce0a7a-8e0c-4474-b452-590d07ea8230";
 }
