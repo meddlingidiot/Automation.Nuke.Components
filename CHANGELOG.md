@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### 📝 Other Changes
 
+- Improve Codecov integration: Add token support, update upload logic, enhance logging ([b22f8a2](../../commit/b22f8a2))
 - Switch Build to ReleasePackage mode and clean up commented code ([59a9b67](../../commit/59a9b67))
 - Add Codecov support with upload functionality and README badge ([63b4eb9](../../commit/63b4eb9))
 - Update LICENSE file with clarifications and additional guidance ([ae68e4e](../../commit/ae68e4e))

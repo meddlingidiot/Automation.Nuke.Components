@@ -1,4 +1,4 @@
-using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using Automation.Nuke.Components.Parameters;
 using Nuke.Common;
@@ -51,99 +51,67 @@ public interface IGenerateCoverageReport : INukeBuild, IHasTests, IHasArtifacts
 
             if (UploadToCodecov)
             {
+                EnsureCodecovUploaderInstalled().Wait();
                 UploadCoverageToCodecov(CoverageReportDirectory / "Cobertura.xml");
             }
         });
 
-    private void UploadCoverageToCodecov(AbsolutePath coberturaFile)
+    AbsolutePath CodecovUploaderPath
     {
-        var commit = Environment.GetEnvironmentVariable("GITHUB_SHA")
-                     ?? ProcessTasks.StartProcess("git", "rev-parse HEAD").AssertWaitForExit()
-                         .Output.Select(x => x.Text).LastOrDefault()?.Trim()
-                     ?? throw new Exception("Could not determine git commit SHA for Codecov upload");
-
-        var branch = Environment.GetEnvironmentVariable("GITHUB_HEAD_REF")
-                     ?? Environment.GetEnvironmentVariable("GITHUB_REF_NAME")
-                     ?? ProcessTasks.StartProcess("git", "branch --show-current").AssertWaitForExit()
-                         .Output.Select(x => x.Text).LastOrDefault()?.Trim()
-                     ?? "main";
-
-        var slug = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY")
-                   ?? ParseSlugFromRemote();
-
-        var query = $"commit={Uri.EscapeDataString(commit)}&branch={Uri.EscapeDataString(branch)}&service=github";
-        if (slug is not null)
-            query += $"&slug={Uri.EscapeDataString(slug)}";
-        if (!string.IsNullOrEmpty(CodecovToken))
-            query += $"&token={Uri.EscapeDataString(CodecovToken)}";
-
-        Serilog.Log.Debug("Codecov upload params: commit={Commit}, branch={Branch}, slug={Slug}, hasToken={HasToken}",
-            commit, branch, slug, !string.IsNullOrEmpty(CodecovToken));
-
-        using var http = new HttpClient();
-        http.DefaultRequestHeaders.Add("Accept", "text/plain");
-        http.DefaultRequestHeaders.Add("X-Reduced-Redundancy", "false");
-
-        Serilog.Log.Information("Requesting Codecov upload URL...");
-        var response = http.PostAsync($"https://codecov.io/upload/v4?{query}", new StringContent("")).GetAwaiter().GetResult();
-
-        if (!response.IsSuccessStatusCode)
+        get
         {
-            var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-            throw new Exception($"Codecov upload URL request failed ({response.StatusCode}): {error}");
+            var exe = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "codecov.exe" : "codecov";
+            return TemporaryDirectory / "codecov" / exe;
         }
-
-        var body = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-        var lines = body.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        // Line 0 = Codecov result/view URL, Line 1 = GCS presigned upload URL
-        if (lines.Length < 2)
-            throw new Exception($"Unexpected Codecov response (expected 2 lines): {body}");
-
-        var resultUrl = lines[0].Trim();
-        var uploadUrl = lines[1].Trim();
-
-        Serilog.Log.Debug("Codecov result URL: {ResultUrl}", resultUrl);
-        Serilog.Log.Information("Uploading coverage report to Codecov...");
-
-        using var request = new HttpRequestMessage(HttpMethod.Put, uploadUrl);
-        request.Content = new ByteArrayContent(File.ReadAllBytes(coberturaFile));
-        request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
-
-        var putResponse = http.SendAsync(request).GetAwaiter().GetResult();
-
-        if (!putResponse.IsSuccessStatusCode)
-        {
-            var error = putResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-            throw new Exception($"Codecov file upload failed ({putResponse.StatusCode}): {error}");
-        }
-
-        Serilog.Log.Information("Coverage uploaded: {Url}", resultUrl);
     }
 
-    private static string? ParseSlugFromRemote()
+    private async Task EnsureCodecovUploaderInstalled()
     {
-        var remote = ProcessTasks.StartProcess("git", "remote get-url origin").AssertWaitForExit()
-            .Output.Select(x => x.Text).LastOrDefault()?.Trim();
+        if (CodecovUploaderPath.FileExists()) return;
 
-        if (string.IsNullOrEmpty(remote))
-            return null;
+        var os = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "windows"
+               : RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "linux"
+               : "macos";
+        var exe = os == "windows" ? "codecov.exe" : "codecov";
+        var downloadUrl = $"https://uploader.codecov.io/latest/{os}/{exe}";
 
-        // https://github.com/owner/repo.git  or  git@github.com:owner/repo.git
-        if (remote.StartsWith("https://"))
-        {
-            var path = new Uri(remote).AbsolutePath.TrimStart('/').TrimEnd('/');
-            if (path.EndsWith(".git")) path = path[..^4];
-            return path;
-        }
+        Serilog.Log.Information("Downloading Codecov uploader from {Url}...", downloadUrl);
 
-        var colonIdx = remote.LastIndexOf(':');
-        if (colonIdx >= 0)
-        {
-            var path = remote[(colonIdx + 1)..].TrimEnd('/');
-            if (path.EndsWith(".git")) path = path[..^4];
-            return path;
-        }
+        var installDir = TemporaryDirectory / "codecov";
+        installDir.CreateDirectory();
 
-        return null;
+        using var client = new HttpClient();
+        client.DefaultRequestHeaders.Add("User-Agent", "nuke-build");
+        var bytes = await client.GetByteArrayAsync(downloadUrl);
+        await File.WriteAllBytesAsync(CodecovUploaderPath, bytes);
+
+        if (os != "windows")
+            ProcessTasks.StartProcess("chmod", $"+x {CodecovUploaderPath}").AssertZeroExitCode();
+
+        Serilog.Log.Information("Codecov uploader installed to {Path}", CodecovUploaderPath);
+    }
+
+    private void UploadCoverageToCodecov(AbsolutePath coberturaFile)
+    {
+        var args = $"--file \"{coberturaFile}\" --rootDir \"{RootDirectory}\"";
+
+        if (!string.IsNullOrEmpty(CodecovToken))
+            args += $" --token \"{CodecovToken}\"";
+
+        var githubRepo = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY");
+        if (!string.IsNullOrEmpty(githubRepo))
+            args += $" --slug \"{githubRepo}\"";
+
+        var commit = Environment.GetEnvironmentVariable("GITHUB_SHA");
+        if (!string.IsNullOrEmpty(commit))
+            args += $" --sha \"{commit}\"";
+
+        var branch = Environment.GetEnvironmentVariable("GITHUB_HEAD_REF")
+                     ?? Environment.GetEnvironmentVariable("GITHUB_REF_NAME");
+        if (!string.IsNullOrEmpty(branch))
+            args += $" --branch \"{branch}\"";
+
+        Serilog.Log.Information("Uploading coverage to Codecov...");
+        ProcessTasks.StartProcess(CodecovUploaderPath, args, logOutput: true).AssertZeroExitCode();
     }
 }
