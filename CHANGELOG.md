@@ -2,11 +2,49 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - 1.0.19-beta.1+16
+## [Unreleased] - 1.0.29-beta.1+8
 
 ### 📝 Other Changes
 
+- Add missing `using System;` directive in `Build.cs` file ([5862a2d](../../commit/5862a2d))
+- Remove commented-out steps for coverage badge creation and Codecov upload in GitHub Actions workflow ([14d5271](../../commit/14d5271))
+- Update Automation.Nuke.Components/Components/IGenerateCoverageReport.cs ([9646ec5](../../commit/9646ec5))
+- Add `CodecovToken` implementation to `Build.cs` ([5863929](../../commit/5863929))
+- Mark `CodecovToken` as a secret and remove hardcoded tokens in `Build.cs`. ([6afe297](../../commit/6afe297))
+- Enhance Codecov integration: Add upload flag to workflow, update token handling, and simplify uploader logic ([7d7a173](../../commit/7d7a173))
 - Improve Codecov integration: Ensure uploader installation, simplify upload logic, and enhance OS compatibility ([ceebeae](../../commit/ceebeae))
+
+## [1.0.28] - 2026-04-16
+
+### 📝 Other Changes
+
+- Update Codecov token reference in Build.cs and GitHub Actions workflow ([9a85d75](../../commit/9a85d75))
+
+## [1.0.27] - 2026-04-16
+
+### 📝 Other Changes
+
+- Simplify environment variable used for Codecov ([6f78bf9](../../commit/6f78bf9))
+- Add Codecov token to GitHub Actions build environment ([5fd0014](../../commit/5fd0014))
+- Fix missing semicolon in Build.cs ([feb0662](../../commit/feb0662))
+- Use environment variable for Codecov token in Build configuration ([7758d8e](../../commit/7758d8e))
+
+## [1.0.26] - 2026-04-15
+
+### 📝 Other Changes
+
+- Update package dependencies: Spectre.Console to 0.55.0, System.CommandLine to 2.0.6, and TUnit to 1.34.5 ([3d7e409](../../commit/3d7e409))
+
+## [1.0.25] - 2026-04-15
+
+### 📝 Other Changes
+
+- Add BreakBuildOnSecretLeaks property to IHasTests interface ([869837b](../../commit/869837b))
+
+## [1.0.24] - 2026-04-14
+
+### 📝 Other Changes
+
 - Improve Codecov integration: Add token support, update upload logic, enhance logging ([b22f8a2](../../commit/b22f8a2))
 - Switch Build to ReleasePackage mode and clean up commented code ([59a9b67](../../commit/59a9b67))
 - Add Codecov support with upload functionality and README badge ([63b4eb9](../../commit/63b4eb9))
@@ -15,11 +53,36 @@ All notable changes to this project will be documented in this file.
 - Switch BuildFileGenerator to use GitHubActionsBuild and add GitHub-specific interfaces ([fc388fe](../../commit/fc388fe))
 - Enable Microsoft Testing Platform and remove Codecov badge from README.md ([fde5d99](../../commit/fde5d99))
 - Remove first attempt of TUnit test infrastructure and switched to it for the unit tests. ([9d221ca](../../commit/9d221ca))
+
+## [1.0.23] - 2026-04-12
+
+### 📝 Other Changes
+
 - Add interfaces for TUnit test execution components with shared logic ([b7bd857](../../commit/b7bd857))
 - Remove TUnit test infrastructure and add Apache 2.0 license file ([b12eebf](../../commit/b12eebf))
+
+## [1.0.22] - 2026-04-11
+
+### 📝 Other Changes
+
 - try again ([1b540a1](../../commit/1b540a1))
+
+## [1.0.21] - 2026-04-11
+
+### 📝 Other Changes
+
 - trying something else for running MTP tests ([cccee67](../../commit/cccee67))
+
+## [1.0.20] - 2026-04-10
+
+### 📝 Other Changes
+
 - again ([be6adb0](../../commit/be6adb0))
+
+## [1.0.19] - 2026-04-10
+
+### 📝 Other Changes
+
 - TUnit support still ([d50f3ac](../../commit/d50f3ac))
 - More adding of TUnit ([0f48bf6](../../commit/0f48bf6))
 
