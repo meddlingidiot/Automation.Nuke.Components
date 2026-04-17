@@ -28,7 +28,7 @@ public interface ICreateGitHubRelease : INukeBuild, IHasGitVersion, IHasGitHubPa
         .OnlyWhenStatic(() => GitHubActions.Instance != null)
         .Executes(async () =>
         {
-            GitHubTasks.GitHubClient = new GitHubClient(new ProductHeaderValue("nuke-build"))
+            var client = new GitHubClient(new ProductHeaderValue("nuke-build"))
             {
                 Credentials = new Credentials(GitHubToken)
             };
@@ -36,13 +36,18 @@ public interface ICreateGitHubRelease : INukeBuild, IHasGitVersion, IHasGitHubPa
             var owner = GitRepository.GetGitHubOwner();
             var repoName = GitRepository.GetGitHubName();
 
-            var issues = await GitRepository.GetGitHubMilestoneIssues(MilestoneTitle);
+            var milestones = await client.Issue.Milestone.GetAllForRepository(owner, repoName);
+            var milestone = milestones.FirstOrDefault(m => m.Title == MilestoneTitle);
+            var issues = milestone != null
+                ? await client.Issue.GetAllForRepository(owner, repoName,
+                    new RepositoryIssueRequest { Milestone = milestone.Number.ToString(), State = ItemStateFilter.All })
+                : [];
 
             var releaseNotes = issues.Count > 0
                 ? "## Issues\n\n" + string.Join("\n", issues.Select(i => $"- #{i.Number} {i.Title}"))
                 : string.Empty;
 
-            var release = await GitHubTasks.GitHubClient.Repository.Release.Create(
+            var release = await client.Repository.Release.Create(
                 owner,
                 repoName,
                 new NewRelease(MilestoneTitle)
@@ -56,6 +61,6 @@ public interface ICreateGitHubRelease : INukeBuild, IHasGitVersion, IHasGitHubPa
             Serilog.Log.Information("GitHub release created: {Url}", release.HtmlUrl);
 
             foreach (var issue in issues)
-                await GitHubTasks.GitHubClient.Issue.Comment.Create(owner, repoName, issue.Number, $"Released in [{MilestoneTitle}]({release.HtmlUrl})! 🎉");
+                await client.Issue.Comment.Create(owner, repoName, issue.Number, $"Released in [{MilestoneTitle}]({release.HtmlUrl})! 🎉");
         });
 }

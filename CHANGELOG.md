@@ -2,17 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - 1.0.29-beta.1+8
+## [1.0.32] - 2026-04-17
 
 ### 📝 Other Changes
 
-- Add missing `using System;` directive in `Build.cs` file ([5862a2d](../../commit/5862a2d))
-- Remove commented-out steps for coverage badge creation and Codecov upload in GitHub Actions workflow ([14d5271](../../commit/14d5271))
-- Update Automation.Nuke.Components/Components/IGenerateCoverageReport.cs ([9646ec5](../../commit/9646ec5))
-- Add `CodecovToken` implementation to `Build.cs` ([5863929](../../commit/5863929))
-- Mark `CodecovToken` as a secret and remove hardcoded tokens in `Build.cs`. ([6afe297](../../commit/6afe297))
-- Enhance Codecov integration: Add upload flag to workflow, update token handling, and simplify uploader logic ([7d7a173](../../commit/7d7a173))
-- Improve Codecov integration: Ensure uploader installation, simplify upload logic, and enhance OS compatibility ([ceebeae](../../commit/ceebeae))
+- Update branch check to include both "main" and "master" in ICreateGitHubRelease (#7) ([620e40e](../../commit/620e40e))
+
+## [1.0.31] - 2026-04-17
+
+### 📝 Other Changes
+
+- Enhance Codecov integration and GitHub release process (#6) ([6f895b1](../../commit/6f895b1))
+
+## [1.0.30] - 2026-04-17
+
+### 📝 Other Changes
+
+- Add Github Releases automated...  (#5) ([e3e60cc](../../commit/e3e60cc))
+
+## [1.0.29] - 2026-04-16
+
+### 📝 Other Changes
+
+- Feature/test codecov (#4) ([d78c625](../../commit/d78c625))
 
 ## [1.0.28] - 2026-04-16
 
