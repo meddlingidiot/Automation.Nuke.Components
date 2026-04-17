@@ -107,19 +107,19 @@ public static class BuildFileGenerator
             {
                 "IHasGitHubPackages", "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets",  "IRunUnitTests",
                 "IRunIntegrationTests", "IGenerateCoverageReport", "ITest",
-                "IUpdateChangelog", "IPackage", "ITagRelease", "IAnnounceRelease"
+                "IUpdateChangelog", "IPackage", "ITagRelease", "ICreateGitHubRelease",  "IAnnounceRelease"
             },
             "VelopackBuild" => new List<string>
             {
                 "IHasGitHubPackages", "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets",  "IRunUnitTests",
                 "IRunIntegrationTests", "IGenerateCoverageReport", "ITest",
-                "IUpdateChangelog", "IVelopack", "ITagRelease", "IAnnounceRelease"
+                "IUpdateChangelog", "IVelopack", "ITagRelease", "ICreateGitHubRelease", "IAnnounceRelease"
             },
             "PackageAndVelopackBuild" => new List<string>
             {
                 "IHasGitHubPackages", "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets", "IRunUnitTests",
                 "IRunIntegrationTests", "IGenerateCoverageReport", "ITest", 
-                "IUpdateChangelog", "IPackage", "IVelopack", "ITagRelease", "IAnnounceRelease"
+                "IUpdateChangelog", "IPackage", "IVelopack", "ITagRelease", "ICreateGitHubRelease",  "IAnnounceRelease"
             },
             _ => new List<string>   {
             "IHasGitHubPackages", "IShowVersion", "IClean", "ICompile", "IRestore", "IScanForSecrets"

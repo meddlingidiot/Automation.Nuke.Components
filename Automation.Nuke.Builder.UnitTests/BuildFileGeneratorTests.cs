@@ -79,7 +79,7 @@ public class BuildFileGeneratorTests
 
         using (Assert.Multiple())
         {
-            await Assert.That(result).Contains("IUpdateChangelog, IPackage, ITagRelease, IAnnounceRelease");
+            await Assert.That(result).Contains("IUpdateChangelog, IPackage, ITagRelease, ICreateGitHubRelease, IAnnounceRelease");
             await Assert.That(result).Contains("x => ((IPackage)x).ReleasePackage);");
         }
     }
@@ -105,7 +105,7 @@ public class BuildFileGeneratorTests
 
         using (Assert.Multiple())
         {
-            await Assert.That(result).Contains("IUpdateChangelog, IVelopack, ITagRelease, IAnnounceRelease");
+            await Assert.That(result).Contains("IUpdateChangelog, IVelopack, ITagRelease, ICreateGitHubRelease, IAnnounceRelease");
             await Assert.That(result).Contains("y => ((IVelopack)y).ReleaseVelopack);");
             await Assert.That(result).Contains("string IHasVelopack.VelopackProjectName => \"MyApp\";");
         }
@@ -159,7 +159,7 @@ public class BuildFileGeneratorTests
 
         using (Assert.Multiple())
         {
-            await Assert.That(result).Contains("IUpdateChangelog, IPackage, IVelopack, ITagRelease, IAnnounceRelease");
+            await Assert.That(result).Contains("IUpdateChangelog, IPackage, IVelopack, ITagRelease, ICreateGitHubRelease, IAnnounceRelease");
             await Assert.That(result).Contains("x => ((IPackage)x).ReleasePackage,");
             await Assert.That(result).Contains("y => ((IVelopack)y).ReleaseVelopack);");
         }

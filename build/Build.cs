@@ -15,7 +15,9 @@ using Automation.Nuke.Components.Parameters;
 ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
 ///   - Microsoft VSCode           https://nuke.build/vscode
 
-public class Build : GitHubActionsBuild, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets, IRunUnitTests, IRunIntegrationTests, IGenerateCoverageReport, ITest, IUpdateChangelog, IPackage, ITagRelease, IAnnounceRelease
+public class Build : GitHubActionsBuild, IShowVersion, IClean, ICompile, IRestore, IScanForSecrets, IRunUnitTests, 
+    IRunIntegrationTests, IGenerateCoverageReport, ITest, IUpdateChangelog, IPackage, ITagRelease,
+    ICreateGitHubRelease, IAnnounceRelease
 {
 
     public static int Main() => Execute<Build>(
