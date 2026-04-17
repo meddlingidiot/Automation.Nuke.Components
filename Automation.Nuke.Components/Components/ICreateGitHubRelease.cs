@@ -24,7 +24,7 @@ public interface ICreateGitHubRelease : INukeBuild, IHasGitVersion, IHasGitHubPa
 
     Target CreateGitHubRelease => _ => _
         .TriggeredBy<ITagRelease>(x => x.TagRelease)
-        .OnlyWhenStatic(() => GitRepository.IsOnMasterBranch())
+        .OnlyWhenStatic(() => GitRepository.IsOnMainOrMasterBranch())
         .OnlyWhenStatic(() => GitHubActions.Instance != null)
         .Executes(async () =>
         {
