@@ -4,6 +4,8 @@ using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.Git;
 using Nuke.Common.Tools.GitHub;
 using Octokit;
+using System.IO;
+using Nuke.Common.IO;
 
 namespace Automation.Nuke.Components.Components;
 
@@ -11,7 +13,7 @@ namespace Automation.Nuke.Components.Components;
 /// Creates a GitHub release and comments on milestone issues after a tag is pushed.
 /// Requires <see cref="ITagRelease"/> to be implemented on the build.
 /// </summary>
-public interface ICreateGitHubRelease : INukeBuild, IHasGitVersion, IHasGitHubPackages
+public interface ICreateGitHubRelease : INukeBuild, IHasGitVersion, IHasGitHubPackages, IHasArtifacts
 {
     [GitRepository]
     GitRepository GitRepository => TryGetValue(() => GitRepository);
@@ -28,7 +30,7 @@ public interface ICreateGitHubRelease : INukeBuild, IHasGitVersion, IHasGitHubPa
         .OnlyWhenStatic(() => GitHubActions.Instance != null)
         .Executes(async () =>
         {
-            var client = new GitHubClient(new ProductHeaderValue("nuke-build"))
+            var client = new GitHubClient(new ProductHeaderValue("Automation.Nuke.Components"))
             {
                 Credentials = new Credentials(GitHubToken)
             };
@@ -59,6 +61,20 @@ public interface ICreateGitHubRelease : INukeBuild, IHasGitVersion, IHasGitHubPa
                 });
 
             Serilog.Log.Information("GitHub release created: {Url}", release.HtmlUrl);
+
+            var packages = PackagePublishDirectory.GlobFiles("**/*.nupkg");
+            foreach (var package in packages)
+            {
+                await using var stream = File.OpenRead(package);
+                var assetUpload = new ReleaseAssetUpload
+                {
+                    FileName = Path.GetFileName(package),
+                    ContentType = "application/octet-stream",
+                    RawData = stream
+                };
+                await client.Repository.Release.UploadAsset(release, assetUpload);
+                Serilog.Log.Information("Uploaded release asset: {Package}", package.Name);
+            }
 
             foreach (var issue in issues)
                 await client.Issue.Comment.Create(owner, repoName, issue.Number, $"Released in [{MilestoneTitle}]({release.HtmlUrl})! 🎉");
