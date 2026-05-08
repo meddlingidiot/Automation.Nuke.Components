@@ -1,11 +1,12 @@
 # Automation.Nuke.Components
 
-A comprehensive Nuke build automation framework designed for enterprise-scale .NET projects. This solution provides reusable build components, pre-configured build templates, and an interactive setup tool to streamline CI/CD pipeline creation across multiple projects.
-
+[![.NET](https://img.shields.io/badge/.NET-net10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![Build](https://github.com/meddlingidiot/Automation.Nuke.Components/actions/workflows/build.yml/badge.svg)](https://github.com/meddlingidiot/Automation.Nuke.Components/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/meddlingidiot/Automation.Nuke.Components/branch/main/graph/badge.svg)](https://codecov.io/gh/meddlingidiot/Automation.Nuke.Components)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/meddlingidiot/Automation.Nuke.Components)](https://github.com/meddlingidiot/Automation.Nuke.Components/releases)
 [![License](https://img.shields.io/github/license/meddlingidiot/Automation.Nuke.Components)](LICENSE)
+
+A comprehensive Nuke build automation framework designed for enterprise-scale .NET projects. This solution provides reusable build components, pre-configured build templates, and an interactive setup tool to streamline CI/CD pipeline creation across multiple projects.
 
 ## 📦 Projects
 
