@@ -45,14 +45,15 @@ public interface IPublishBlazorWasm : INukeBuild, IHasConfiguration, IHasGitVers
             ProcessTasks.StartProcess("git", $"clone --depth 1 {authenticatedUrl} .", workingDirectory: cloneDir)
                 .AssertZeroExitCode();
 
-            // Remove all existing content except .git
+            // Remove all existing content except .git and .github
             foreach (var file in Directory.EnumerateFiles(cloneDir, "*", SearchOption.AllDirectories))
             {
                 var relative = Path.GetRelativePath(cloneDir, file);
                 if (!relative.StartsWith(".git"))
                     File.Delete(file);
             }
-            foreach (var dir in Directory.GetDirectories(cloneDir).Where(d => Path.GetFileName(d) != ".git"))
+            foreach (var dir in Directory.GetDirectories(cloneDir)
+                         .Where(d => Path.GetFileName(d) != ".git" && Path.GetFileName(d) != ".github"))
                 Directory.Delete(dir, recursive: true);
 
             // Copy wwwroot contents into repo root
