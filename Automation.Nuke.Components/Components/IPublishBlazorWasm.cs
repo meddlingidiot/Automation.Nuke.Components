@@ -22,7 +22,10 @@ public interface IPublishBlazorWasm : INukeBuild, IHasConfiguration, IHasGitVers
 
             var projectFile = RootDirectory / BlazorProjectPath;
             Serilog.Log.Information("Publishing {Project}", BlazorProjectPath);
-
+            
+            ProcessTasks.StartProcess("dotnet", "workload install wasm-tools")
+                .AssertZeroExitCode();;
+            
             DotNetPublish(s => s
                 .SetProject(projectFile)
                 .SetConfiguration(Configuration)
