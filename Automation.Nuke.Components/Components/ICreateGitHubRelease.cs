@@ -25,6 +25,7 @@ public interface ICreateGitHubRelease : INukeBuild, IHasGitVersion, IHasGitHubPa
     string MilestoneTitle => $"v{GitVersion.MajorMinorPatch}";
 
     Target CreateGitHubRelease => _ => _
+        .DependsOn<IPublishBlazorWasm>(x => x.PublishBlazorWasm)
         .TriggeredBy<ITagRelease>(x => x.TagRelease)
         .OnlyWhenStatic(() => GitRepository.IsOnMainOrMasterBranch())
         .OnlyWhenStatic(() => GitHubActions.Instance != null)

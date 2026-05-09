@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 1.0.33
+
+### 📝 Other Changes
+
+- Add Blazor WASM publish and deployment component with static site support ([da78dbf](../../commit/da78dbf))
+- Add artifact upload to GitHub release creation ([841c0ae](../../commit/841c0ae))
+- Refactor GitHub release creation flow to simplify client usage and integrate milestone-based issue retrieval. ([8383ba4](../../commit/8383ba4))
+
 ## [1.0.32] - 2026-04-17
 
 ### 📝 Other Changes
